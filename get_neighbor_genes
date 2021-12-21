@@ -1,0 +1,35 @@
+# Gene list
+
+# Gene annotation
+
+
+#No overlaps
+closestBed -D ref -k 3 -iu -io -a gene_regions_hg38.sorted.bed -b gencode.v39.all_genes.txt > downstream_no.bed
+closestBed -D ref -k 3 -id -io -a gene_regions_hg38.sorted.bed -b gencode.v39.all_genes.txt > upstream_no.bed
+
+#Regex to parse BED into three column file (done in Notepad++; convert to python)
+^chr[0-9]{1,2}\t[0-9]+\t[0-9]+\t([A-Za-z0-9\.\-]+)\tchr[0-9]{1,2}\t[0-9]+\t[0-9]+.+\t([A-Za-z0-9\.\-]+)\tprotein_coding\t-?(\d+)$
+#Replace with (gene of interest   neighbouring gene    distance (in bp)); Distance may be important to determine relative positions down the line.
+\1\t\2\t\3
+
+#Format neighbour gene list to fit genomic_sequence_downloader.py
+Currently did this in excel's Power Query (adapted from https://techcommunity.microsoft.com/t5/excel/reorganised-a-long-format-table-to-a-wide-data-table/m-p/1530800). Check a pythonic way to do it!
+
+#Feed list into genomic_sequence_downloader.py
+
+filename = 'IUCNspecies.txt'
+
+with open(filename) as file:
+    lines = file.readlines()
+    lines = [line.rstrip() for line in lines]
+for line in list_of_genes_and_neighbours:
+  #parse line to get all the parameters:
+  genes = line.split()
+  target_gene = genes[0]
+  1d = genes[1]
+  2d = genes[2]
+  3d = genes[3]
+  1u = genes[4]
+  2u = genes[5]
+  3u = genes[6]
+  genomic_downloader.py -target_gene_name $target_gene -1st_downstream_flanking_gene_name $1d -2nd_downstream_flanking_gene_name $2d -3rd_downstream_flanking_gene_name $3d -1st_upstream_flanking_gene_name $1u -2nd_upstream_flanking_gene_name $2u -3rd_upstream_flanking_gene_name $3u -target_species_list_file_path $species_list -sequences_content_output_file_path ${target_gene}_seq.fas -sequences_data_output_file_path
